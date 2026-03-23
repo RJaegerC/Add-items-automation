@@ -1,0 +1,67 @@
+pipeline {
+    agent {
+        node {
+            label 'docker-agent-js'
+        }
+    }
+
+    triggers {
+        pollSCM('* * * * *')
+    }
+
+    environment {
+        IMAGE_NAME = 'seu-usuario/minha-app'
+        IMAGE_TAG = 'latest'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                echo "Cloning repo..."
+                checkout scm
+            }
+        }
+
+        stage('Login Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    '''
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo "Building Docker image..."
+                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+            }
+        }
+
+        stage('Test (opcional)') {
+            steps {
+                echo "Testing container..."
+                sh '''
+                docker run -d -p 3000:3000 --name test-container $IMAGE_NAME:$IMAGE_TAG
+                sleep 5
+                docker logs test-container
+                docker stop test-container
+                docker rm test-container
+                '''
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                echo "Pushing image..."
+                sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
+            }
+        }
+    }
+}
