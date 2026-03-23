@@ -1,0 +1,74 @@
+name: Actions-ci
+
+on:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+
+  lint:
+    name: 🔍 Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+      - run: npm run ci
+      - run: npm run lint || true
+
+  # ALTERNATIVA AO GRYPE
+  audit:
+    name: 🔒 NPM Audit Security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+      - run: npm audit --audit-level=high || true
+
+  grype:
+    name: 🛡️ Grype Vuln Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Scan current project
+        uses: anchore/scan-action@v3
+        id: scan
+        with:
+          path: "."
+          fail-build: false
+          output-format: table
+
+  bearer:
+    name: 🐻 Bearer SAST
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Run Report
+        id: report
+        uses: bearer/bearer-action@v2
+        with:
+          exit-code: 0
+
+  tests:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+      - run: npm run ci
+      - run: sudo npm test
