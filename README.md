@@ -27,6 +27,37 @@ intending to minimize vulnerabilities in the code.
 
 -cd to jenkins directory
 
+## Disclaimer
+
+If by any means you are facing trouble with the build of the image, remove the docker imager or container and use this: 
+
+**docker pull devopsjourney1/jenkins-blueocean:2.332.3-1** 
+
+then set: 
+
+**docker tag devopsjourney1/jenkins-blueocean:2.332.3-1 myjenkins-blueocean:2.332.3-1**
+
+Run(Linux/macOS): 
+
+**docker run --name jenkins-blueocean --restart=on-failure --detach \
+  --network jenkins --env DOCKER_HOST=tcp://docker:2376 \
+  --env DOCKER_CERT_PATH=/certs/client --env DOCKER_TLS_VERIFY=1 \
+  --publish 8080:8080 --publish 50000:50000 \
+  --volume jenkins-data:/var/jenkins_home \
+  --volume jenkins-docker-certs:/certs/client:ro \
+  myjenkins-blueocean:2.332.3-1**
+
+Run(Windows)
+
+**docker run --name jenkins-blueocean --restart=on-failure --detach `
+  --network jenkins --env DOCKER_HOST=tcp://docker:2376 `
+  --env DOCKER_CERT_PATH=/certs/client --env DOCKER_TLS_VERIFY=1 `
+  --volume jenkins-data:/var/jenkins_home `
+  --volume jenkins-docker-certs:/certs/client:ro `
+  --publish 8080:8080 --publish 50000:50000 myjenkins-blueocean:2.332.3-1**
+
+##
+
 -run:
 
 **docker build -t myjenkins-blueocean:2.414.2 .**
@@ -35,7 +66,7 @@ intending to minimize vulnerabilities in the code.
 
 **docker network create jenkins**
 
-- Run the container with the jenkins master server:
+- Run the container with the jenkins master server(Linux/macOS):
 
 **docker run --name jenkins-blueocean --restart=on-failure --detach \
   --network jenkins --env DOCKER_HOST=tcp://docker:2376 \
@@ -44,6 +75,15 @@ intending to minimize vulnerabilities in the code.
   --volume jenkins-data:/var/jenkins_home \
   --volume jenkins-docker-certs:/certs/client:ro \
   myjenkins-blueocean:2.414.2**
+
+- Run the container with Windows:
+
+**docker run --name jenkins-blueocean --restart=on-failure --detach `
+  --network jenkins --env DOCKER_HOST=tcp://docker:2376 `
+  --env DOCKER_CERT_PATH=/certs/client --env DOCKER_TLS_VERIFY=1 `
+  --volume jenkins-data:/var/jenkins_home `
+  --volume jenkins-docker-certs:/certs/client:ro `
+  --publish 8080:8080 --publish 50000:50000 myjenkins-blueocean:2.414.2**
 
 - get the password:
 
