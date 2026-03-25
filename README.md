@@ -37,6 +37,10 @@ then set:
 
 **docker tag devopsjourney1/jenkins-blueocean:2.332.3-1 myjenkins-blueocean:2.332.3-1**
 
+- Create the jenkins separate network for security purposes:
+
+**docker network create jenkins**
+
 Run(Linux/macOS): 
 
 **docker run --name jenkins-blueocean --restart=on-failure --detach \
@@ -55,6 +59,8 @@ Run(Windows)
   --volume jenkins-data:/var/jenkins_home `
   --volume jenkins-docker-certs:/certs/client:ro `
   --publish 8080:8080 --publish 50000:50000 myjenkins-blueocean:2.332.3-1**
+
+the other steps remain the same
 
 ##
 
@@ -89,11 +95,11 @@ Run(Windows)
 
 **docker exec jenkins-blueocean cat /var/jenkins_home/secrets/initialAdminPassword**
 
-- first connection:
+- first connection and profile configuration:
 
 **https://localhost:8080/**
 
-- alpine/socat container to forward traffic from Jenkins to Docker Desktop on Host Machine (this gonna be used for the jenkins agent server):
+- alpine/socat container to forward traffic from Jenkins to Docker Desktop on Host Machine (this gonna be used for the jenkins agent server for the application):
 
 **docker run -d --restart=always -p 127.0.0.1:2376:2375 --network jenkins -v /var/run/docker.sock:/var/run/docker.sock alpine/socat tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
 docker inspect <container_id> | grep IPAddress**
